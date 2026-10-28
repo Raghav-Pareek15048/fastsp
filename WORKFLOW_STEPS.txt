@@ -1,0 +1,268 @@
+================================================================================
+TRAVELING SALESPERSON PROBLEM (TSP) SOLVER: COMPLETE WORKFLOW & EXECUTION FLOW
+================================================================================
+Project: Graph Algorithms in Production - Part 1: The Traveling Salesperson Problem
+Implementation: Pure Python & Native C++ wrapped with Cython
+Package Name: tsp-fast-solver (v0.1.0)
+Date: October 2026
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. Objective & Requirements Overview
+2. Environment Setup & Compiler Configuration
+3. Step 1: Pure Python Solver Implementation (itertools.permutations)
+4. Step 2: Native C++ Solver Implementation (std::next_permutation)
+5. Step 3: Cython Wrapper Implementation (.pxd and .pyx)
+6. Step 4: Python Package & Build Setup (setup.py, pyproject.toml, MANIFEST.in)
+7. Step 5: Extension Compilation (In-place C++ Build)
+8. Step 6: Testing & Verification (test_solvers.py & pytest)
+9. Step 7: Benchmarking & Performance Comparison (benchmark.py)
+10. Step 8: Packaging Source Distribution (python -m build --sdist)
+11. Step 9: Version Control via Git & GitHub Push
+12. Step 10: Publishing to PyPI via Twine & Final Verification
+13. Project Directory Structure
+
+================================================================================
+1. OBJECTIVE & REQUIREMENTS OVERVIEW
+================================================================================
+The objective of this assignment is to solve the classic NP-hard Traveling
+Salesperson Problem (TSP) using a brute-force approach across two implementations:
+  1. A pure Python implementation using `itertools.permutations`.
+  2. A native C++ implementation using `std::next_permutation`, exposed to Python
+     through Cython.
+  3. Benchmark both implementations on graphs of sizes N=8, N=10, and N=11 using
+     Python's `timeit` module to observe the factorial scaling O((N-1)!) and the
+     order-of-magnitude speedup achieved by compiled C++.
+  4. Package the resulting library using modern Python packaging standards
+     (`pyproject.toml`, `setup.py`, `MANIFEST.in`), build a Source Distribution
+     (`sdist`), prepare Git tracking, and provide end-to-end instructions for
+     PyPI publication via Twine.
+
+================================================================================
+2. ENVIRONMENT SETUP & COMPILER CONFIGURATION
+================================================================================
+- OS: Windows 64-bit (Windows PE)
+- Python Version: Python 3.12.1 (64-bit)
+- Essential Python tools installed:
+    python -m pip install cython build twine pytest setuptools
+- C++ Compiler Setup:
+  Because Python 3.12 64-bit requires a 64-bit C++ compiler to compile extensions,
+  the modern 64-bit MinGW-w64 toolchain (GCC 16.1.0 with UCRT runtime) was
+  configured from WinLibs:
+    Path: C:\Users\Raghav Pareek\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.MCF.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin
+  To ensure portable execution across all Windows systems without external DLL
+  dependencies, static runtime linking flags were supplied:
+    `-static -static-libgcc -static-libstdc++`
+
+================================================================================
+3. STEP 1: PURE PYTHON SOLVER IMPLEMENTATION
+================================================================================
+- File: `src/python_solver/solver.py`
+- Function: `tsp_python(distance_matrix)`
+- Logic:
+  1. Let N = len(distance_matrix).
+  2. Handles edge cases: N <= 1 returns 0; N == 2 returns distance[0][1] + distance[1][0].
+  3. For N >= 3, fixes node 0 as the starting and ending origin city.
+  4. Permutes the remaining (N-1) cities using `itertools.permutations(range(1, n))`.
+  5. Computes route cost: distance[0][p[0]] + sum(distance[p[i]][p[i+1]]) + distance[p[-1]][0].
+  6. Tracks and returns the minimum tour cost across all (N-1)! candidate routes.
+
+================================================================================
+4. STEP 2: NATIVE C++ SOLVER IMPLEMENTATION
+================================================================================
+- Header File: `src/cpp/tsp.h`
+  Declares the signature:
+    `int tsp_solver(const std::vector<int>& dist_matrix, int n);`
+
+- Source File: `src/cpp/tsp.cpp`
+  Implementation details:
+  1. Takes the flattened 1D distance matrix (size n * n) and node count n.
+  2. Cities 1 through n-1 are loaded into `std::vector<int> cities(n - 1)` using `std::iota`.
+  3. Uses `const int* matrix = dist_matrix.data();` for pointer dereferencing in the inner loop.
+  4. Iterates through all (N-1)! permutations using:
+       do {
+           // calculate path cost for current permutation
+       } while (std::next_permutation(cities.begin(), cities.end()));
+  5. Updates `min_cost` whenever a shorter tour is discovered and returns the minimum.
+
+================================================================================
+5. STEP 3: CYTHON WRAPPER IMPLEMENTATION
+================================================================================
+- Cython Definition Header: `src/cython_wrapper/tsp_c.pxd`
+  Declares C++ vector and the external function:
+    from libcpp.vector cimport vector
+    cdef extern from "tsp.h":
+        int tsp_solver(const vector[int]& dist_matrix, int n)
+
+- Cython Implementation: `src/cython_wrapper/tsp_wrapper.pyx`
+  Function: `tsp_cython(distance_matrix)`
+  1. Accepts Python 2D list-of-lists.
+  2. Allocates a C++ `std::vector<int> vec_1d` with `reserve(n * n)`.
+  3. Flattens the 2D matrix into the 1D vector.
+  4. Calls the native `tsp_solver(vec_1d, n)`.
+  5. Returns the optimal integer path cost back to Python with minimal overhead.
+
+================================================================================
+6. STEP 4: PACKAGE & BUILD CONFIGURATION
+================================================================================
+- Top-level Package: `tsp_fast_solver/`
+  `__init__.py`: Exports `tsp_python` and `tsp_cython`.
+  `python_solver.py`: Bundled Python fallback.
+
+- `setup.py`:
+  Uses `setuptools.Extension` with `Cython.Build.cythonize`:
+    - Language set to C++.
+    - Sources: `src/cython_wrapper/tsp_wrapper.pyx` and `src/cpp/tsp.cpp`.
+    - Includes: `src/cpp` and `src/cython_wrapper`.
+    - Compiler flags: `-O3 -std=c++11`.
+    - Linker flags: `-static -static-libgcc -static-libstdc++`.
+
+- `pyproject.toml`:
+  Defines build dependencies: `requires = ["setuptools>=61.0", "cython>=3.0"]`.
+  Package metadata: name = "tsp-fast-solver", version = "0.1.0", license = "MIT".
+
+- `MANIFEST.in`:
+  Ensures all headers (`.h`), source files (`.cpp`), Cython definitions (`.pxd`, `.pyx`),
+  and documentation (`README.md`, `WORKFLOW_STEPS.txt`) are packaged into the sdist.
+
+- `.gitignore`:
+  Ignores compiled binaries (`*.pyd`, `*.so`), build caches (`build/`, `dist/`, `.pytest_cache/`),
+  and intermediate Cython generated C++ code.
+
+================================================================================
+7. STEP 5: EXTENSION COMPILATION (IN-PLACE BUILD)
+================================================================================
+Command executed:
+  $env:PATH = "C:\Users\Raghav Pareek\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.MCF.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin;" + $env:PATH
+  python setup.py build_ext --inplace --force -c mingw32
+
+Result:
+  - `tsp_wrapper.pyx` cythonized into `tsp_wrapper.cpp`.
+  - Compiled and linked `tsp_wrapper.cp312-win_amd64.pyd` inside `tsp_fast_solver/`.
+  - Statically linked with zero missing external DLL dependencies.
+
+================================================================================
+8. STEP 6: TESTING & VERIFICATION
+================================================================================
+Created unit test suite: `test_solvers.py`
+Tests executed with pytest:
+  1. `test_edge_cases`: Empty graph, 1-node graph, 2-node graph.
+  2. `test_known_triangle_graph`: Exact known cost calculation.
+  3. `test_4_node_graph`: Verification on textbook 4-city graph.
+  4. `test_equivalence_random_graphs`: Full equivalence check between Python
+     and Cython on random matrices of sizes N=4, 5, 6, 7.
+
+Execution command:
+  pytest test_solvers.py -v
+Result:
+  4 passed in 0.05s (100% success rate).
+
+================================================================================
+9. STEP 7: BENCHMARKING & PERFORMANCE COMPARISON
+================================================================================
+Benchmark script: `benchmark.py`
+Executes on graph sizes N=8, N=10, and N=11 using `timeit.default_timer()`.
+
+Actual Recorded Results:
+--------------------------------------------------------------------------------
+Graph Size (Nodes) | Routes (N-1)! | Python Time (s) | Cython Time (s) | Speedup
+--------------------------------------------------------------------------------
+N = 8              | 5,040         | 0.0034s         | 0.00005s        | 71.5x
+N = 10             | 362,880       | 0.3384s         | 0.0033s         | 101.7x
+N = 11             | 3,628,800     | 3.8315s         | 0.0418s         | 91.6x
+--------------------------------------------------------------------------------
+
+Observations:
+- Cython C++ is between 71x and 102x faster than Pure Python.
+- Evaluating 3,628,800 full routes took only 41.8 milliseconds in Cython C++,
+  compared to nearly 4 seconds in pure Python.
+- Both implementations returned identical minimum tour costs, confirming mathematical equivalence.
+
+================================================================================
+10. STEP 8: PACKAGING SOURCE DISTRIBUTION (SDIST)
+================================================================================
+Command executed:
+  python -m build --sdist
+
+Result:
+  Created `dist/tsp_fast_solver-0.1.0.tar.gz`.
+  The distribution archive bundles:
+    - C++ header (`src/cpp/tsp.h`) and implementation (`src/cpp/tsp.cpp`)
+    - Cython definition (`src/cython_wrapper/tsp_c.pxd`) and wrapper (`src/cython_wrapper/tsp_wrapper.pyx`)
+    - Python solver and package modules (`tsp_fast_solver/`)
+    - `setup.py`, `pyproject.toml`, `MANIFEST.in`, `README.md`, `WORKFLOW_STEPS.txt`
+
+================================================================================
+11. STEP 9: VERSION CONTROL VIA GIT & GITHUB PUSH
+================================================================================
+To push this codebase to your GitHub repository, run the following commands
+in PowerShell / Terminal:
+
+  # 1. Initialize git repository
+  git init
+
+  # 2. Add files (honoring .gitignore)
+  git add .
+
+  # 3. Create initial commit
+  git commit -m "Initial commit: Pure Python and Cython C++ TSP solvers with benchmarks"
+
+  # 4. Set main branch
+  git branch -M main
+
+  # 5. Link to your GitHub repository (replace with your repo URL)
+  git remote add origin https://github.com/<your-username>/tsp-fast-solver.git
+
+  # 6. Push code to GitHub
+  git push -u origin main
+
+================================================================================
+12. STEP 10: PUBLISHING TO PYPI VIA TWINE & VERIFICATION
+================================================================================
+To publish the library to PyPI so anyone can install via `pip install tsp-fast-solver`:
+
+  # 1. Upload to PyPI using Twine
+  python -m twine upload dist/*
+
+  When prompted:
+    Enter username: __token__
+    Enter password: <pypi-api-token> (starts with pypi-...)
+
+  # 2. Verify installation in a clean environment
+  pip install tsp-fast-solver
+  python -c "import tsp_fast_solver; print('Success! Installed tsp-fast-solver version:', tsp_fast_solver.__version__)"
+
+  # 3. Test in Python:
+  python -c "from tsp_fast_solver import tsp_python, tsp_cython; dist = [[0, 5, 10], [5, 0, 8], [10, 8, 0]]; print('Python cost:', tsp_python(dist)); print('Cython cost:', tsp_cython(dist))"
+
+================================================================================
+13. PROJECT DIRECTORY STRUCTURE
+================================================================================
+c:\Users\Raghav Pareek\Desktop\Study\CPython\
+├── .gitignore
+├── benchmark.py
+├── MANIFEST.in
+├── pyproject.toml
+├── README.md
+├── setup.py
+├── test_solvers.py
+├── WORKFLOW_STEPS.txt
+├── dist/
+│   └── tsp_fast_solver-0.1.0.tar.gz
+├── src/
+│   ├── cpp/
+│   │   ├── tsp.h
+│   │   └── tsp.cpp
+│   ├── cython_wrapper/
+│   │   ├── __init__.py
+│   │   ├── tsp_c.pxd
+│   │   └── tsp_wrapper.pyx
+│   └── python_solver/
+│       ├── __init__.py
+│       └── solver.py
+└── tsp_fast_solver/
+    ├── __init__.py
+    ├── python_solver.py
+    └── tsp_wrapper.cp312-win_amd64.pyd
+================================================================================
