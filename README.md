@@ -142,19 +142,20 @@ git remote add origin https://github.com/<your-username>/tsp-fast-solver.git
 git push -u origin main
 ```
 
-### Step 2: Upload to PyPI using Twine
+### Step 2: Published PyPI Package
+The library is live globally on PyPI:
+🔗 **PyPI URL**: [https://pypi.org/project/tsp-fast-solver-raghav15048/0.1.2/](https://pypi.org/project/tsp-fast-solver-raghav15048/0.1.2/)
+
 ```bash
-# Upload distribution archive to PyPI
+# Upload distribution archive to PyPI using Twine
 python -m twine upload dist/*
 ```
-When prompted:
-- **Username**: `__token__`
-- **Password**: `<Your-PyPI-API-Token>`
 
-### Step 3: Verify Installation from PyPI
+### Step 3: Verified Installation from PyPI
+Anyone can install the package directly from PyPI via pip:
 ```bash
-pip install tsp-fast-solver
-python -c "import tsp_fast_solver; print('Successfully installed and imported!')"
+pip install tsp-fast-solver-raghav15048
+python -c "import tsp_fast_solver; from tsp_fast_solver import tsp_python, tsp_cython; print('Success! Version:', tsp_fast_solver.__version__)"
 ```
 
 ---

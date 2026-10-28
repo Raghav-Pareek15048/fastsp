@@ -3,7 +3,7 @@ tsp-fast-solver: High-performance Traveling Salesperson Problem (TSP) solver.
 Includes both a pure Python solver and a blazing-fast native C++ solver wrapped with Cython.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 # Import pure Python solver
 from .python_solver import tsp_python
