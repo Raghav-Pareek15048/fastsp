@@ -8,7 +8,10 @@ import random
 import timeit
 from typing import List
 
-from tsp_fast_solver import tsp_python, tsp_cython
+try:
+    from fastsp import tsp_python, tsp_cython
+except ImportError:
+    from tsp_fast_solver import tsp_python, tsp_cython
 
 
 def generate_distance_matrix(n: int, seed: int = 42, max_dist: int = 100) -> List[List[int]]:

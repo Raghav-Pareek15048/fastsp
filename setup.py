@@ -14,7 +14,7 @@ pyx_source = "src/cython_wrapper/tsp_wrapper.pyx"
 # Common extension configuration
 ext_modules = [
     Extension(
-        name="tsp_fast_solver.tsp_wrapper",
+        name="fastsp.tsp_wrapper",
         sources=[pyx_source, cpp_source],
         include_dirs=[CPP_DIR, CYTHON_DIR],
         language="c++",
@@ -24,8 +24,8 @@ ext_modules = [
 ]
 
 setup(
-    name="tsp-fast-solver-raghav15048",
-    version="0.1.2",
+    name="fastsp",
+    version="0.1.0",
     description="A blazing fast C++ TSP solver wrapped in Cython",
     packages=find_packages(),
     ext_modules=cythonize(

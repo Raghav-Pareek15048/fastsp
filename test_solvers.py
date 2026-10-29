@@ -3,7 +3,10 @@ Unit tests for TSP Solvers (Pure Python and Cython C++ wrapper).
 """
 
 import pytest
-from tsp_fast_solver import tsp_python, tsp_cython
+try:
+    from fastsp import tsp_python, tsp_cython
+except ImportError:
+    from tsp_fast_solver import tsp_python, tsp_cython
 
 
 def test_edge_cases():

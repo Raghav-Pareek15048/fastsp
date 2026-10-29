@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "cython>=3.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tsp-fast-solver-raghav15048"
-version = "0.1.2"
+name = "fastsp"
+version = "0.1.0"
 authors = [{ name="Raghav Pareek", email="raghav@example.com" }]
 description = "A blazing fast C++ TSP solver wrapped in Cython"
 readme = "README.md"

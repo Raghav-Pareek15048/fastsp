@@ -220,23 +220,23 @@ in PowerShell / Terminal:
 ================================================================================
 12. STEP 10: PUBLISHING TO PYPI VIA TWINE & VERIFICATION (COMPLETED & VERIFIED)
 ================================================================================
-The package has been successfully published to the Python Package Index (PyPI)
-and verified live!
+The package has been renamed to "fastsp" and successfully published to the
+Python Package Index (PyPI) and verified live!
 
 Live PyPI Package URL:
-  https://pypi.org/project/tsp-fast-solver-raghav15048/0.1.2/
+  https://pypi.org/project/fastsp/0.1.0/
 
 Commands executed for publication:
   1. Build clean source distribution and precompiled Windows binary wheel:
        python setup.py build_ext -c mingw32 bdist_wheel
-       python -m build --sdist
+       python setup.py sdist
 
   2. Upload distribution to PyPI using Twine:
        python -m twine upload -u __token__ -p "pypi-..." dist/*
 
   3. Verified installation directly from PyPI (tested outside workspace):
-       pip install tsp-fast-solver-raghav15048
-       python -c "import tsp_fast_solver; from tsp_fast_solver import tsp_python, tsp_cython; print('Package version:', tsp_fast_solver.__version__); print('Cython cost:', tsp_cython([[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]))"
+       pip install fastsp
+       python -c "import fastsp; from fastsp import tsp_python, tsp_cython; print('Package version:', fastsp.__version__); print('Cython cost:', tsp_cython([[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]))"
        
      Result:
        Successfully downloaded and installed wheel from PyPI.
@@ -269,8 +269,11 @@ c:\Users\Raghav Pareek\Desktop\Study\CPython\
 │   └── python_solver/
 │       ├── __init__.py
 │       └── solver.py
+├── fastsp/
+│   ├── __init__.py
+│   ├── python_solver.py
+│   └── tsp_wrapper.cp312-win_amd64.pyd
 └── tsp_fast_solver/
     ├── __init__.py
-    ├── python_solver.py
-    └── tsp_wrapper.cp312-win_amd64.pyd
+    └── python_solver.py
 ================================================================================

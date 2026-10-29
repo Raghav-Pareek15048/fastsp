@@ -1,4 +1,4 @@
-# tsp-fast-solver: High-Performance TSP Solver in Pure Python & C++ (Cython)
+# fastsp: High-Performance TSP Solver in Pure Python & C++ (Cython)
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -58,9 +58,11 @@ CPython/
 │       ├── __init__.py
 │       ├── tsp_c.pxd           # Cython declaration bridging C++ header
 │       └── tsp_wrapper.pyx     # Cython implementation converting list-of-lists to std::vector<int>
-└── tsp_fast_solver/            # Python package entry point
-    ├── __init__.py             # Exports tsp_python and tsp_cython
-    └── python_solver.py        # Packaged pure Python fallback
+├── fastsp/                     # Python package entry point
+│   ├── __init__.py             # Exports tsp_python and tsp_cython
+│   ├── python_solver.py        # Packaged pure Python fallback
+│   └── tsp_wrapper.*.pyd       # Compiled C++ extension binary
+└── tsp_fast_solver/            # Compatible alias package
 ```
 
 ---
@@ -93,7 +95,7 @@ The resulting `.tar.gz` archive will be located in the `dist/` directory.
 ## 💻 Usage Example
 
 ```python
-from tsp_fast_solver import tsp_python, tsp_cython
+from fastsp import tsp_python, tsp_cython
 
 # Define an N x N distance matrix (e.g. 4 cities)
 distance_matrix = [
@@ -138,13 +140,13 @@ git init
 git add .
 git commit -m "Initial commit: Pure Python and Cython C++ TSP solvers"
 git branch -M main
-git remote add origin https://github.com/<your-username>/tsp-fast-solver.git
+git remote add origin https://github.com/<your-username>/fastsp.git
 git push -u origin main
 ```
 
 ### Step 2: Published PyPI Package
 The library is live globally on PyPI:
-🔗 **PyPI URL**: [https://pypi.org/project/tsp-fast-solver-raghav15048/0.1.2/](https://pypi.org/project/tsp-fast-solver-raghav15048/0.1.2/)
+🔗 **PyPI URL**: [https://pypi.org/project/fastsp/0.1.0/](https://pypi.org/project/fastsp/0.1.0/)
 
 ```bash
 # Upload distribution archive to PyPI using Twine
@@ -154,8 +156,8 @@ python -m twine upload dist/*
 ### Step 3: Verified Installation from PyPI
 Anyone can install the package directly from PyPI via pip:
 ```bash
-pip install tsp-fast-solver-raghav15048
-python -c "import tsp_fast_solver; from tsp_fast_solver import tsp_python, tsp_cython; print('Success! Version:', tsp_fast_solver.__version__)"
+pip install fastsp
+python -c "import fastsp; from fastsp import tsp_python, tsp_cython; print('Success! Version:', fastsp.__version__)"
 ```
 
 ---

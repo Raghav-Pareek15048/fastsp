@@ -3,4 +3,5 @@ include pyproject.toml
 include setup.py
 include WORKFLOW_STEPS.txt
 recursive-include src *.h *.cpp *.pxd *.pyx *.py
+recursive-include fastsp *.py
 recursive-include tsp_fast_solver *.py
