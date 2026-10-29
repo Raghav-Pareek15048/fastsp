@@ -212,7 +212,7 @@ in PowerShell / Terminal:
   git branch -M main
 
   # 5. Link to your GitHub repository (replace with your repo URL)
-  git remote add origin https://github.com/<your-username>/tsp-fast-solver.git
+  git remote add origin https://github.com/Raghav-Pareek15048/tsp-fast-solver.git
 
   # 6. Push code to GitHub
   git push -u origin main
