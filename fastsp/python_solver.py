@@ -41,3 +41,4 @@ def tsp_python(distance_matrix: Sequence[Sequence[Union[int, float]]]) -> Union[
             min_cost = cost
 
     return min_cost
+
